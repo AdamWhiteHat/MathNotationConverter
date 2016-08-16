@@ -28,30 +28,20 @@ namespace MathNotationConverter
 
 		private static void AddToOutput(List<char> output, params char[] chars)
 		{
-			if (chars != null && chars.Length > 0)
-			{
-				foreach (char c in chars)
-				{
-					output.Add(c);
-				}
-				output.Add(' ');
-			}
+			if (chars.Length < 1) throw new ArgumentOutOfRangeException();
+
+			output.AddRange(chars);
+			output.Add(' ');
 		}
 
 		public static string Convert(string infixNotationString)
 		{
-			if (string.IsNullOrWhiteSpace(infixNotationString))
-			{
-				throw new ArgumentException("Argument infixNotationString must not be null, empty or whitespace.", "infixNotationString");
-			}
-
-			List<char> output = new List<char>();
-			Stack<char> operatorStack = new Stack<char>();
-			string sanitizedString = new string(infixNotationString.Where(c => AllowedCharacters.Contains(c)).ToArray());
+			if (string.IsNullOrWhiteSpace(infixNotationString)) throw new ArgumentException("Argument infixNotationString must not be null, empty or whitespace.", "infixNotationString");
 
 			string number = string.Empty;
 			List<string> enumerableInfixTokens = new List<string>();
-			foreach (char c in sanitizedString)
+			string inputString = new string(infixNotationString.Where(c => AllowedCharacters.Contains(c)).ToArray());
+			foreach (char c in inputString)
 			{
 				if (StaticStrings.Operators.Contains(c) || "()".Contains(c))
 				{
@@ -66,10 +56,7 @@ namespace MathNotationConverter
 				{
 					number += c.ToString();
 				}
-				else
-				{
-					throw new Exception(string.Format("Unexpected character '{0}'.", c));
-				}
+				else throw new Exception(string.Format("Unexpected character '{0}'.", c));
 			}
 
 			if (number.Length > 0)
@@ -78,11 +65,13 @@ namespace MathNotationConverter
 				number = string.Empty;
 			}
 
+			List<char> outputQueue = new List<char>();
+			Stack<char> operatorStack = new Stack<char>();
 			foreach (string token in enumerableInfixTokens)
 			{
 				if (StaticStrings.IsNumeric(token))
 				{
-					AddToOutput(output, token.ToArray());
+					AddToOutput(outputQueue, token.ToArray());
 				}
 				else if (token.Length == 1)
 				{
@@ -90,20 +79,21 @@ namespace MathNotationConverter
 
 					if (StaticStrings.Numbers.Contains(c))
 					{
-						AddToOutput(output, c);
+						AddToOutput(outputQueue, c);
 					}
 					else if (StaticStrings.Operators.Contains(c))
 					{
 						if (operatorStack.Count > 0)
 						{
 							char o = operatorStack.Peek();
-							if ((AssociativityDictionary[c] == Associativity.Left &&
-								PrecedenceDictionary[c] <= PrecedenceDictionary[o])
-									||
-								(AssociativityDictionary[c] == Associativity.Right &&
-								PrecedenceDictionary[c] < PrecedenceDictionary[o]))
+							if (
+								(AssociativityDictionary[c] == Associativity.Left
+										&& PrecedenceDictionary[c] <= PrecedenceDictionary[o])
+								||
+								(AssociativityDictionary[c] == Associativity.Right
+										&& PrecedenceDictionary[c] < PrecedenceDictionary[o]))
 							{
-								AddToOutput(output, operatorStack.Pop());
+								AddToOutput(outputQueue, operatorStack.Pop());
 							}
 						}
 						operatorStack.Push(c);
@@ -115,55 +105,34 @@ namespace MathNotationConverter
 					else if (c == ')')
 					{
 						bool leftParenthesisFound = false;
-						while (operatorStack.Count > 0 )
+						while (operatorStack.Count > 0)
 						{
 							char o = operatorStack.Peek();
-							if (o != '(')
-							{
-								AddToOutput(output, operatorStack.Pop());
-							}
-							else
+							if (o == '(')
 							{
 								operatorStack.Pop();
 								leftParenthesisFound = true;
 								break;
 							}
+							AddToOutput(outputQueue, operatorStack.Pop());
 						}
 
-						if (!leftParenthesisFound)
-						{
-							throw new FormatException("The algebraic string contains mismatched parentheses (missing a left parenthesis).");
-						}
+						if (!leftParenthesisFound) throw new FormatException("The algebraic string contains mismatched parentheses (missing a left parenthesis).");
 					}
-					else
-					{
-						throw new Exception(string.Format("Unrecognized character '{0}'.", c));
-					}
+					else throw new Exception("Unrecognized character " + c.ToString());
 				}
-				else
-				{
-					throw new Exception(string.Format("String '{0}' is not numeric and has a length greater than 1.", token));
-				}
+				else throw new Exception(token + " is not numeric or has a length greater than 1.");
 			} // end foreach
 
 			while (operatorStack.Count > 0)
 			{
 				char o = operatorStack.Pop();
-				if (o == '(')
-				{
-					throw new FormatException("The algebraic string contains mismatched parentheses (extra left parenthesis).");
-				}
-				else if (o == ')')
-				{
-					throw new FormatException("The algebraic string contains mismatched parentheses (extra right parenthesis).");
-				}
-				else
-				{
-					AddToOutput(output, o);
-				}
+				if ("()".Contains(o)) throw new FormatException("The algebraic string contains mismatched parentheses (extra " + (o == '(' ? "left" : "right") + " parenthesis).");
+
+				AddToOutput(outputQueue, o);
 			}
 
-			return new string(output.ToArray());
+			return new string(outputQueue.ToArray()).TrimEnd();
 		}
 	}
 }

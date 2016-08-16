@@ -46,6 +46,8 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+MathNotationConverter/bin/*
+MathNotationConverter/obj/*
 
-/bin/*
-/obj/*
+MathNotationParserTests/bin/*
+MathNotationParserTests/obj/*

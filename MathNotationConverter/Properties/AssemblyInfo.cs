@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("MathNotationConverter")]
 [assembly: AssemblyDescription("Infix to postfix notation converter")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Adam Rakaska")]
+[assembly: AssemblyCompany("csharpprogramming.tips")]
 [assembly: AssemblyProduct("MathNotationConverter")]
 [assembly: AssemblyCopyright("Public Domain")]
 [assembly: AssemblyTrademark("")]
