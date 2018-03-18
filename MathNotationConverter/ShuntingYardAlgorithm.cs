@@ -7,25 +7,6 @@ namespace MathNotationConverter
 {
 	public static class ShuntingYardAlgorithm
 	{
-		private static string AllowedCharacters = StaticStrings.Numbers + StaticStrings.Operators + "()";
-
-		private enum Associativity
-		{
-			Left, Right
-		}
-		private static Dictionary<char, int> PrecedenceDictionary = new Dictionary<char, int>()
-		{
-			{'(', 0}, {')', 0},
-			{'+', 1}, {'-', 1},
-			{'*', 2}, {'/', 2},
-			{'^', 3}
-		};
-		private static Dictionary<char, Associativity> AssociativityDictionary = new Dictionary<char, Associativity>()
-		{
-			{'+', Associativity.Left}, {'-', Associativity.Left}, {'*', Associativity.Left}, {'/', Associativity.Left},
-			{'^', Associativity.Right}
-		};
-
 		private static void AddToOutput(List<char> output, params char[] chars)
 		{
 			if (chars.Length < 1) throw new ArgumentOutOfRangeException();
@@ -40,7 +21,7 @@ namespace MathNotationConverter
 
 			string number = string.Empty;
 			List<string> enumerableInfixTokens = new List<string>();
-			string inputString = new string(infixNotationString.Where(c => AllowedCharacters.Contains(c)).ToArray());
+			string inputString = new string(infixNotationString.Where(c => StaticStrings.AllowedCharacters.Contains(c)).ToArray());
 			foreach (char c in inputString)
 			{
 				if (StaticStrings.Operators.Contains(c) || "()".Contains(c))
@@ -87,11 +68,12 @@ namespace MathNotationConverter
 						{
 							char o = operatorStack.Peek();
 							if (
-								(AssociativityDictionary[c] == Associativity.Left
-										&& PrecedenceDictionary[c] <= PrecedenceDictionary[o])
-								||
-								(AssociativityDictionary[c] == Associativity.Right
-										&& PrecedenceDictionary[c] < PrecedenceDictionary[o]))
+									(StaticStrings.AssociativityDictionary[c] == StaticStrings.Associativity.Left
+											&& StaticStrings.PrecedenceDictionary[c] <= StaticStrings.PrecedenceDictionary[o])
+									||
+									(StaticStrings.AssociativityDictionary[c] == StaticStrings.Associativity.Right
+											&& StaticStrings.PrecedenceDictionary[c] < StaticStrings.PrecedenceDictionary[o])
+								)
 							{
 								AddToOutput(outputQueue, operatorStack.Pop());
 							}

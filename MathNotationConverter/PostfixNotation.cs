@@ -10,9 +10,17 @@ namespace MathNotationConverter
 	{
 		private static string AllowedCharacters = StaticStrings.Numbers + StaticStrings.Operators + " ";
 
+		private static Expression ConvertExpressionType(Expression expression, Type type)
+		{
+			return (expression.Type != type) ? Expression.Convert(expression, type) : expression;
+		}
+
 		public static Expression<Func<int>> ExpressionTree(string postfixNotationString)
 		{
-			if (string.IsNullOrWhiteSpace(postfixNotationString)) throw new ArgumentException("Argument postfixNotationString must not be null, empty or whitespace.", "postfixNotationString");
+			if (string.IsNullOrWhiteSpace(postfixNotationString))
+			{
+				throw new ArgumentException("Argument postfixNotationString must not be null, empty or whitespace.", "postfixNotationString");
+			}
 
 			Stack<Expression> stack = new Stack<Expression>();
 			string sanitizedString = new string(postfixNotationString.Where(c => AllowedCharacters.Contains(c)).ToArray());
@@ -27,7 +35,10 @@ namespace MathNotationConverter
 
 				if (token.Length > 1) // Numbers > 10 will have a token length > 1
 				{
-					if (!StaticStrings.IsNumeric(token) || !parseSuccess) throw new Exception("Operators and operands must be separated by a space.");
+					if (!StaticStrings.IsNumeric(token) || !parseSuccess)
+					{
+						throw new Exception("Operators and operands must be separated by a space.");
+					}
 					stack.Push(Expression.Constant(tokenValue));
 				}
 				else
@@ -50,22 +61,25 @@ namespace MathNotationConverter
 						// ^ token uses Math.Pow, which both gives and takes double, hence convert
 						if (tokenChar == '^')
 						{
-							if (left.Type != typeof(double)) left = Expression.Convert(left, typeof(double));
-							if (right.Type != typeof(double)) right = Expression.Convert(right, typeof(double));
+							left = ConvertExpressionType(left, typeof(double));
+							right = ConvertExpressionType(right, typeof(double));
+							
 						}
 						else // Math.Pow returns a double, so we must check here for all other operators
 						{
-							if (left.Type != typeof(int)) left = Expression.Convert(left, typeof(int));
-							if (right.Type != typeof(int)) right = Expression.Convert(right, typeof(int));
+							left = ConvertExpressionType(left, typeof(int));
+							right = ConvertExpressionType(right, typeof(int));
 						}
 
-						if (tokenChar == '+') operation = Expression.AddChecked(left, right);
-						else if (tokenChar == '-') operation = Expression.SubtractChecked(left, right);
-						else if (tokenChar == '*') operation = Expression.MultiplyChecked(left, right);
-						else if (tokenChar == '/') operation = Expression.Divide(left, right);
-						else if (tokenChar == '^') operation = Expression.Power(left, right);
-
-						if (operation == null) throw new Exception("Value never got set.");
+						switch (tokenChar)
+						{
+							case '+': operation = Expression.AddChecked(left, right); break;
+							case '-': operation = Expression.SubtractChecked(left, right); break;
+							case '*': operation = Expression.MultiplyChecked(left, right); break;
+							case '/': operation = Expression.Divide(left, right); break;
+							case '^': operation = Expression.Power(left, right); break;
+							default: throw new Exception(string.Format("Unrecognized character '{0}'.", tokenChar));
+						}
 
 						stack.Push(operation);
 					}
