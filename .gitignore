@@ -51,3 +51,4 @@ MathNotationConverter/obj/*
 
 MathNotationParserTests/bin/*
 MathNotationParserTests/obj/*
+.vs/

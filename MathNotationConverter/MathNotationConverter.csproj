@@ -43,6 +43,7 @@
     <Compile Include="InfixNotation.cs" />
     <Compile Include="PostfixNotation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PrefixNotation.cs" />
     <Compile Include="ShuntingYardAlgorithm.cs" />
     <Compile Include="StaticStrings.cs" />
   </ItemGroup>
