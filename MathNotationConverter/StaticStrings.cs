@@ -10,8 +10,9 @@ namespace MathNotationConverter
 	{
 		public static string Numbers = "0123456789";
 		public static string Operators = "+-*/^";
+		public static string Variables = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-		public static string AllowedCharacters = Numbers + Operators + "()";
+		public static string AllowedCharacters = Numbers + Operators + "()" + Variables;
 
 		public enum Associativity
 		{
@@ -35,6 +36,11 @@ namespace MathNotationConverter
 		public static bool IsNumeric(string text)
 		{
 			return string.IsNullOrWhiteSpace(text) ? false : text.All(c => Numbers.Contains(c));
+		}
+
+		public static bool IsVariable(char token)
+		{
+			return Variables.Contains(token);
 		}
 	}
 }

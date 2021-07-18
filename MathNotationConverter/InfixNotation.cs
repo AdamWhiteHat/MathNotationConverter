@@ -10,7 +10,7 @@ namespace MathNotationConverter
 	{
 		public static int Evaluate(string infixNotationString)
 		{
-			string postFixNotationString = ShuntingYardAlgorithm.Convert(infixNotationString);
+			string postFixNotationString = PostfixNotation.Convert(infixNotationString);
 			return PostfixNotation.Evaluate(postFixNotationString);
 		}
 	}
