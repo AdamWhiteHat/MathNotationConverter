@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExpressionVisitors\Expressions.cs" />
+    <Compile Include="ExpressionVisitors\Parameters.cs" />
     <Compile Include="InfixNotation.cs" />
     <Compile Include="PostfixNotation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

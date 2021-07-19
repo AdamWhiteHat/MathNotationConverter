@@ -19,26 +19,55 @@ namespace MathNotationParserTests
 		public void Test001()
 		{
 			string three = "3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3";
-			string fourteen = "5 + ((1 + 2) * 4) - 3";
-			string twenty_a = "1 + 9 * 2 - 11 / 14 - 12 / 12";
-			string twenty_b = "18 + 12 / 5 - 2 * 2 * 4 / 19";
+			string prefixResult1 = PrefixNotation.Convert(three);
+			string expectingPrefix1 = "3 4 2 * 1 5 - 2 3 ^ ^ / +";
 
-			string prefix1 = PrefixNotation.Convert(three);
-			string prefix2 = PrefixNotation.Convert(fourteen);
-			string prefix3 = PrefixNotation.Convert(twenty_a);
-			string prefix4 = PrefixNotation.Convert(twenty_b);
-
-			int result1 = 0;
-			int result2 = 0;
-			int result3 = 0;
-			int result4 = 0;
-
-			TestContext.WriteLine($"{three   } => {prefix1}");
-			TestContext.WriteLine($"{fourteen} => {prefix2}");
-			TestContext.WriteLine($"{twenty_a} => {prefix3}");
-			TestContext.WriteLine($"{twenty_b} => {prefix4}");
-
+			TestContext.WriteLine($"{three   } => {prefixResult1}");
 			TestContext.WriteLine(Environment.NewLine);
+
+			Assert.AreEqual(expectingPrefix1, prefixResult1, "#1");
+		}
+
+		[TestCategory("Parsing")]
+		[TestMethod]
+		public void Test002()
+		{
+			string fourteen = "5 + ((1 + 2) * 4) - 3";
+			string prefixResult2 = PrefixNotation.Convert(fourteen);
+			string expectingPrefix2 = "5 1 2 + 4 * + 3 -";
+
+			TestContext.WriteLine($"{fourteen} => {prefixResult2}");
+			TestContext.WriteLine(Environment.NewLine);
+
+			Assert.AreEqual(expectingPrefix2, prefixResult2, "#2");
+		}
+
+		[TestCategory("Parsing")]
+		[TestMethod]
+		public void Test003()
+		{
+			string twenty_a = "1 + 9 * 2 - 11 / 14 - 12 / 12";
+			string prefixResult3 = PrefixNotation.Convert(twenty_a);
+			string expectingPrefix3 = "1 9 2 * 11 14 / 12 12 / - - +";
+
+			TestContext.WriteLine($"{twenty_a} => {prefixResult3}");
+			TestContext.WriteLine(Environment.NewLine);
+
+			Assert.AreEqual(expectingPrefix3, prefixResult3, "#3");
+		}
+
+		[TestCategory("Parsing")]
+		[TestMethod]
+		public void Test004()
+		{
+			string twenty_b = "18 + 12 / 5 - 2 * 2 * 4 / 19";
+			string prefixResult4 = PrefixNotation.Convert(twenty_b);
+			string expectingPrefix4 = "18 12 5 / 2 2 * 4 * 19 / - +";
+
+			TestContext.WriteLine($"{twenty_b} => {prefixResult4}");
+			TestContext.WriteLine(Environment.NewLine);
+
+			Assert.AreEqual(expectingPrefix4, prefixResult4, "#4");
 		}
 	}
 }

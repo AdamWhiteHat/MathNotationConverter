@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
+using System.Collections.Generic;
+using MathNotationConverter.ExpressionVisitors;
 
 namespace MathNotationConverter
 {
@@ -16,6 +16,8 @@ namespace MathNotationConverter
 			{
 				throw new ArgumentException("Argument postfixNotationString must not be null, empty or whitespace.", "postfixNotationString");
 			}
+
+			Dictionary<char, ParameterExpression> variablesDictionary = new Dictionary<char, ParameterExpression>();
 
 			Stack<Expression> stack = new Stack<Expression>();
 			string sanitizedString = new string(postfixNotationString.Where(c => AllowedCharacters.Contains(c)).ToArray());
@@ -46,7 +48,17 @@ namespace MathNotationConverter
 					}
 					else if (StaticStrings.Variables.Contains(tokenChar))
 					{
-						ParameterExpression variable = Expression.Parameter(typeof(int), tokenChar.ToString());
+						ParameterExpression variable = null;
+						if (variablesDictionary.ContainsKey(tokenChar))
+						{
+							variable = variablesDictionary[tokenChar];
+						}
+						else
+						{
+							variable = Expression.Parameter(typeof(int), tokenChar.ToString());
+							variablesDictionary.Add(tokenChar, variable);
+						}
+
 						stack.Push(variable);
 					}
 					else if (StaticStrings.Operators.Contains(tokenChar))
@@ -61,14 +73,14 @@ namespace MathNotationConverter
 						// ^ token uses Math.Pow, which both gives and takes double, hence convert
 						if (tokenChar == '^')
 						{
-							left = ConvertExpressionType(left, typeof(double));
-							right = ConvertExpressionType(right, typeof(double));
+							left = Expressions.ConvertIfNeeded(left, typeof(double));
+							right = Expressions.ConvertIfNeeded(right, typeof(double));
 
 						}
 						else // Math.Pow returns a double, so we must check here for all other operators
 						{
-							left = ConvertExpressionType(left, typeof(int));
-							right = ConvertExpressionType(right, typeof(int));
+							left = Expressions.ConvertIfNeeded(left, typeof(int));
+							right = Expressions.ConvertIfNeeded(right, typeof(int));
 						}
 
 						switch (tokenChar)
@@ -94,47 +106,21 @@ namespace MathNotationConverter
 
 		public static T Evaluate<T>(Expression expression, IEnumerable<T> parameters)
 		{
-			List<ParameterExpression> expressionParameters = GetParameters(expression);
+			Expression copy = expression;
+
+			List<ParameterExpression> expressionParameters = Parameters.SetUniqueInstances(ref copy);
 			if (parameters.Count() != expressionParameters.Count)
 			{
 				throw new ArgumentException($"The number of parameters is wrong; Expression has {expressionParameters.Count} parameters. Supplied {parameters.Count()} parameters.");
 			}
 
-			var lambda = Expression.Lambda(expression, expressionParameters);
+			LambdaExpression lambda = Expression.Lambda(copy, expressionParameters.ToArray());
 			Delegate compiled = lambda.Compile();
 
-			object result = compiled.DynamicInvoke(parameters);
+			object[] objParams = parameters.Select(t => (object)t).ToArray();
+
+			object result = compiled.DynamicInvoke(objParams);
 			return (T)result;
-		}
-
-		private static Expression ConvertExpressionType(Expression expression, Type type)
-		{
-			return (expression.Type != type) ? Expression.Convert(expression, type) : expression;
-		}
-
-		private static List<ParameterExpression> GetParameters(Expression expression)
-		{
-			List<ParameterExpression> result = new List<ParameterExpression>();
-
-			ParameterExpression parameter = expression as ParameterExpression;
-			if (parameter != null)
-			{
-				result.Add(parameter);
-			}
-			else
-			{
-				BinaryExpression binary = expression as BinaryExpression;
-				if (binary != null)
-				{
-					Expression left = binary.Left;
-					Expression right = binary.Right;
-
-					result.AddRange(GetParameters(left));
-					result.AddRange(GetParameters(right));
-				}
-			}
-
-			return result;
 		}
 	}
 }

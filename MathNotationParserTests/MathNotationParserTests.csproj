@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestEnd2End.cs" />
+    <Compile Include="TestEvaluation_ExpressionTree.cs" />
     <Compile Include="TestParsing_ExpressionTree.cs" />
     <Compile Include="TestManyEquationsSameValue.cs" />
     <Compile Include="TestEvaluation_PostfixNotation.cs" />
