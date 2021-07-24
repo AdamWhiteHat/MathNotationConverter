@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MathNotationConverter</RootNamespace>
     <AssemblyName>MathNotationConverter</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -20,6 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
+		<Prefer32Bit>false</Prefer32Bit>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -28,6 +29,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
+		<Prefer32Bit>false</Prefer32Bit>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
@@ -42,6 +44,8 @@
   <ItemGroup>
     <Compile Include="ExpressionVisitors\Expressions.cs" />
     <Compile Include="ExpressionVisitors\Parameters.cs" />
+		<Compile Include="Solver\MathExpression.cs" />
+		<Compile Include="Solver\Variable.cs" />
     <Compile Include="InfixNotation.cs" />
     <Compile Include="PostfixNotation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
