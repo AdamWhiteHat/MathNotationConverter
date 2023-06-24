@@ -108,7 +108,7 @@ namespace MathNotationConverter
 		{
 			Expression copy = expression;
 
-			List<ParameterExpression> expressionParameters = Parameters.SetUniqueInstances(ref copy);
+			List<ParameterExpression> expressionParameters = Parameters.FindAll(copy);
 			if (parameters.Count() != expressionParameters.Count)
 			{
 				throw new ArgumentException($"The number of parameters is wrong; Expression has {expressionParameters.Count} parameters. Supplied {parameters.Count()} parameters.");

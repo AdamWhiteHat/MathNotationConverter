@@ -13,6 +13,11 @@ namespace MathNotationConverter.Solver
 		public Expression ParsedExpression { get; private set; }
 		public List<Variable> Variables { get; private set; }
 
+		public Variable this[char c]
+		{
+			get { return Variables.FirstOrDefault(v => char.ToUpperInvariant(v.Symbol).Equals(char.ToUpperInvariant(c))); }
+		}
+
 		public object Value { get; private set; }
 
 		private MathExpression()
@@ -24,7 +29,7 @@ namespace MathNotationConverter.Solver
 			PostfixExpression = PostfixNotation.Convert(InputExpression);
 			Expression tempExpression = ExpressionTree.Convert(PostfixExpression);
 
-			List<ParameterExpression> parameters = Parameters.SetUniqueInstances(ref tempExpression);
+			List<ParameterExpression> parameters = Parameters.FindAll(tempExpression);
 
 			ParsedExpression = tempExpression;
 			List<Variable> variables = new List<Variable>();

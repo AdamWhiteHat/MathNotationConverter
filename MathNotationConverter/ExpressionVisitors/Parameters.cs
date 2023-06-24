@@ -7,19 +7,10 @@ namespace MathNotationConverter.ExpressionVisitors
 {
 	public static class Parameters
 	{
-		public static List<ParameterExpression> GetDistinct(Expression expression)
+		public static List<ParameterExpression> FindAll(Expression expression)
 		{
-			var expressionVisitor = new Internal.GetDistinctInstances();
+			var expressionVisitor = new Internal.FindParameterExpressions();
 			expressionVisitor.Visit(expression);
-
-			return expressionVisitor.FoundParameters.ToList();
-		}
-
-		public static List<ParameterExpression> SetUniqueInstances(ref Expression expression)
-		{
-			var expressionVisitor = new Internal.SetSingletonInstances();
-			var changedExpression = expressionVisitor.Visit(expression);
-			expression = changedExpression;
 
 			return expressionVisitor.FoundParameters.ToList();
 		}
@@ -41,37 +32,23 @@ namespace MathNotationConverter.ExpressionVisitors
 
 		internal static class Internal
 		{
-			public class GetDistinctInstances : ExpressionVisitor
+			public class FindParameterExpressions : ExpressionVisitor
 			{
 				public List<ParameterExpression> FoundParameters = new List<ParameterExpression>();
 
 				protected override Expression VisitParameter(ParameterExpression node)
 				{
-					ParameterExpression match = FoundParameters.Where(pe => pe.Name == node.Name).FirstOrDefault();
+					ParameterExpression match = FoundParameters.Where(pe =>
+																			pe.Name == node.Name
+																			&&
+																			pe.Type == node.Type
+																)
+																.FirstOrDefault();
 					if (match == default(ParameterExpression))
 					{
 						FoundParameters.Add(node);
 					}
 					return base.VisitParameter(node);
-				}
-			}
-
-			public class SetSingletonInstances : ExpressionVisitor
-			{
-				public List<ParameterExpression> FoundParameters = new List<ParameterExpression>();
-
-				protected override Expression VisitParameter(ParameterExpression node)
-				{
-					ParameterExpression match = FoundParameters.Where(pe => pe.Name == node.Name).FirstOrDefault();
-					if (match == default(ParameterExpression))
-					{
-						FoundParameters.Add(node);
-						return base.VisitParameter(node);
-					}
-					else
-					{
-						return match;
-					}
 				}
 			}
 
@@ -100,4 +77,5 @@ namespace MathNotationConverter.ExpressionVisitors
 		#endregion
 
 	}
+
 }

@@ -25,6 +25,14 @@ namespace MathNotationConverter.Solver
 			Value = null;
 		}
 
+		public void SetValue(object value)
+		{
+			if (Value == null || Value != value)
+			{
+				Value = value;
+			}
+		}
+
 		public Variable Clone()
 		{
 			return new Variable()

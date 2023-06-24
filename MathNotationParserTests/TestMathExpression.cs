@@ -4,6 +4,9 @@ using System.Linq;
 using MathNotationConverter;
 using MathNotationConverter.Solver;
 using MathNotationConverter.ExpressionVisitors;
+using System.Linq.Expressions;
+using System.Collections.Generic;
+using System.Security.Cryptography;
 
 namespace MathNotationParserTests
 {
@@ -19,7 +22,23 @@ namespace MathNotationParserTests
 
 		[TestCategory("Both")]
 		[TestMethod]
-		public void TestMathExp_SetVariable()
+		public void SetVariables_Zero()
+		{
+			string expecting = "0";
+
+			object result = SetVariables(151, 148);
+
+			Assert.AreEqual(expecting, result.ToString(), "SetVariables_Zero");
+		}
+
+		[TestCategory("Both")]
+		[TestMethod]
+		public void SetVariables_NonZero()
+		{
+			object result = SetVariables(150, 149);
+		}
+
+		private object SetVariables(int x, int y)
 		{
 			string inputExpression = "144*x*y - 12*y + 12*x - 3218148";
 
@@ -34,29 +53,63 @@ namespace MathNotationParserTests
 			MathExpression copy = mathExpr.Clone();
 
 			TestContext.WriteLine("Setting variable x...");
-			Parameters.SetValue(mathExpr.ParsedExpression, 'x', 151);
-			TestContext.WriteLine($"Updated Expression: {mathExpr.ParsedExpression}");
+			Expression mathExpr_xSet = Parameters.SetValue(mathExpr.ParsedExpression, 'x', x);
+			TestContext.WriteLine($"Updated Expression: {mathExpr_xSet}");
 			TestContext.WriteLine("");
 
 			TestContext.WriteLine("Setting variable y...");
-			Parameters.SetValue(mathExpr.ParsedExpression, 'y', 148);
-			TestContext.WriteLine($"Updated Expression: {copy.ParsedExpression}");
+			Expression mathExpr_xySet = Parameters.SetValue(mathExpr_xSet, 'y', y);
+			TestContext.WriteLine($"Updated Expression: {mathExpr_xySet}");
 			TestContext.WriteLine("");
 
 			//TestContext.WriteLine("Evaluating...");
 			//mathExpr.Evaluate();
 
-			//TestContext.WriteLine("");
-			//TestContext.WriteLine($"Result: {mathExpr.Value}");
-			//TestContext.WriteLine("");
+			Expression reduced = mathExpr_xySet;
+
+			//while(reduced.CanReduce)
+			//{
+			//	reduced = reduced.Reduce();
+			//}
+
+			LambdaExpression lambda = Expression.Lambda(reduced);
+			Delegate compiled = lambda.Compile();
+			object result = compiled.DynamicInvoke();
+
+			TestContext.WriteLine("");
+			TestContext.WriteLine($"Result: {result}");
+			TestContext.WriteLine("");
+
+			return result;
 		}
 
 		[TestCategory("Both")]
 		[TestMethod]
-		public void TestMathExp_Eval()
+		public void Eval_Zero()
+		{
+			string expecting = "0";
+
+			object result = Eval(151, 148);
+
+			Assert.AreEqual(expecting, result.ToString(), "Eval_Zero");
+		}
+
+		[TestCategory("Both")]
+		[TestMethod]
+		public void Eval_NonZero()
+		{
+			object result = Eval(152, 147);
+		}
+
+		private object Eval(int x, int y)
 		{
 			string inputExpression = "144*x*y - 12*y + 12*x - 3218148";
-			string expecting = "0";
+
+			Dictionary<char, int> variableValueAssignmentDictionary = new Dictionary<char, int>()
+			{
+				{ 'x', x},
+				{ 'y', y }
+			};
 
 			MathExpression mathExpr = new MathExpression(inputExpression);
 
@@ -66,14 +119,19 @@ namespace MathNotationParserTests
 			TestContext.WriteLine($"Variables: {string.Join(", ", mathExpr.Variables.Select(v => v.ToString()))}");
 			TestContext.WriteLine("");
 
+			mathExpr['x'].SetValue(variableValueAssignmentDictionary['x']);
+			mathExpr['y'].SetValue(variableValueAssignmentDictionary['y']);
+
 			TestContext.WriteLine("Evaluating...");
-			object result = mathExpr.Evaluate(new int[] { 151, 148 });
-
-			TestContext.WriteLine("");
-			TestContext.WriteLine($"Result: {mathExpr.Value}");
+			TestContext.WriteLine($"{mathExpr.Variables[0]}");
+			TestContext.WriteLine($"{mathExpr.Variables[1]}");
 			TestContext.WriteLine("");
 
-			Assert.AreEqual(expecting, result.ToString(), "Evaluate");
+			object result = mathExpr.Evaluate();
+			TestContext.WriteLine($"Result: {result}");
+			TestContext.WriteLine("");
+
+			return result;
 		}
 	}
 }
